@@ -15,7 +15,7 @@ parser.add_argument("-e", "--evaluate", type=bool)
 parser.add_argument("--seed", type=int)
 args = parser.parse_args()
 
-print(args.steps, args.seed, args.filename, args.evaluate)
+print(args)
 
 steps = args.steps
 seed = args.seed if args.seed else 23

@@ -26,14 +26,15 @@ class World(metaclass=ABCMeta):
 
 
 class SimpleCarWorld(World):
-    COLLISION_PENALTY =  # выберите сами
-    HEADING_REWARD =  # выберите сами
-    WRONG_HEADING_PENALTY =  # выберите сами
-    IDLENESS_PENALTY =  # выберите сами
-    SPEEDING_PENALTY =  # выберите сами
-    MIN_SPEED =  # выберите сами
-    MAX_SPEED =  # выберите сами
+    UPDATE_TIMEDELTA = 0.1
 
+    COLLISION_PENALTY = 0 * 1e0
+    HEADING_REWARD = 0 * 1e-1
+    WRONG_HEADING_PENALTY = 0 * 1e0
+    IDLENESS_PENALTY = 32 * 1e-1
+    SPEEDING_PENALTY = 32 * 1e-1
+    MIN_SPEED = 0.1 * 1e0
+    MAX_SPEED = 0.7 * 1e0
     size = (800, 600)
 
     def __init__(self, num_agents, car_map, Physics, agent_class, **physics_pars):
@@ -104,7 +105,7 @@ class SimpleCarWorld(World):
         :param collision: произошло ли столкновение со стеной на прошлом шаге
         :return reward: награду агента (возможно, отрицательную)
         """
-        a = np.sin(angle(-state.position, state.heading))
+        a = -np.sin(angle(-state.position, state.heading))
         heading_reward = 1 if a > 0.1 else a if a > 0 else 0
         heading_penalty = a if a <= 0 else 0
         idle_penalty = 0 if abs(state.velocity) > self.MIN_SPEED else -self.IDLENESS_PENALTY
@@ -140,7 +141,7 @@ class SimpleCarWorld(World):
             self.visualize(scale)
             if self._update_display() == pygame.QUIT:
                 break
-            sleep(0.1)
+            sleep(self.UPDATE_TIMEDELTA)
 
         for i, agent in enumerate(self.agents):
             try:
@@ -291,6 +292,7 @@ class SimpleCarWorld(World):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return pygame.QUIT
+
         display = pygame.display.get_surface()
         display.fill(white)
 
