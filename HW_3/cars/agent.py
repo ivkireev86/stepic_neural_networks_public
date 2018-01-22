@@ -36,12 +36,15 @@ class SimpleCarAgent(Agent):
                                    # внутренние слои сети: выберите, сколько и в каком соотношении вам нужно
                                    # например, (self.rays + 4) * 2 или просто число
                                    #(self.rays + 4) * 2,
+                                   6,
                                    1],
                                   output_function=lambda x: x, output_derivative=lambda x: 1)
         self.sensor_data_history = deque([], maxlen=history_data)
         self.chosen_actions_history = deque([], maxlen=history_data)
         self.reward_history = deque([], maxlen=history_data)
+        self.reward_clean_history = deque([], maxlen=history_data)
         self.step = 0
+        self.RANDOM_ACTION_P = 0.30
 
     @classmethod
     def from_weights(cls, layers, weights, biases):
@@ -81,6 +84,12 @@ class SimpleCarAgent(Agent):
         c = open(filename, "r").read()
         return cls.from_string(c)
 
+    def clear_history(self):
+        self.sensor_data_history.clear()
+        self.chosen_actions_history.clear()
+        self.reward_history.clear()
+        self.reward_clean_history.clear()
+
     def show_weights(self):
         params = self.neural_net.sizes, self.neural_net.weights, self.neural_net.biases
         np.set_printoptions(threshold=np.nan)
@@ -115,7 +124,7 @@ class SimpleCarAgent(Agent):
 
         # Добавим случайности, дух авантюризма. Иногда выбираем совершенно
         # рандомное действие
-        if (not self.evaluate_mode) and (random.random() < 0.05):
+        if (not self.evaluate_mode) and (random.random() < self.RANDOM_ACTION_P):
             highest_reward = rewards[np.random.choice(len(rewards))]
             best_action = rewards_to_controls_map[highest_reward]
         # следующие строки помогут вам понять, что предсказывает наша сеть
@@ -130,6 +139,7 @@ class SimpleCarAgent(Agent):
         self.chosen_actions_history.append(best_action)
         self.reward_history.append(0.0)  # мы пока не знаем, какая будет награда, это
         # откроется при вызове метода receive_feedback внешним миром
+        self.reward_clean_history.append(0.0)
 
         return best_action
 
@@ -149,6 +159,7 @@ class SimpleCarAgent(Agent):
         # (если мы врезались в стену - разумно наказывать не только последнее
         # действие, но и предшествующие)
         i = -1
+        self.reward_clean_history[i] = reward
         while len(self.reward_history) > abs(i) and abs(i) < reward_depth:
             self.reward_history[i] += reward
             reward *= 0.5
@@ -163,3 +174,8 @@ class SimpleCarAgent(Agent):
             y_train = self.reward_history
             train_data = [(x[:, np.newaxis], y) for x, y in zip(X_train, y_train)]
             self.neural_net.SGD(training_data=train_data, epochs=15, mini_batch_size=train_every, eta=0.05)
+            # print("nn", self.neural_net)
+            print("revard", np.array(self.reward_clean_history)[-100:].mean())
+
+
+

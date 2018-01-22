@@ -130,18 +130,25 @@ class SimpleCarWorld(World):
         return heading_reward * self.HEADING_REWARD + heading_penalty * self.WRONG_HEADING_PENALTY + collision_penalty \
             + idle_penalty + speeding_penalty
 
-    def run(self, steps=None):
+    def run(self, steps=None, visual=True):
         """
         Основной цикл мира; по завершении сохраняет текущие веса агента в файл network_config_agent_n_layers_....txt
         :param steps: количество шагов цикла; до внешней остановки, если None
+        :param visual: False, если обучать модель в скрытом режиме
         """
-        scale = self._prepare_visualization()
+        if steps is None and not visual:
+            raise RuntimeError("Бесконечный цикл. Задайте steps или visual")
+        if visual:
+            scale = self._prepare_visualization()
+
         for _ in range(steps) if steps is not None else itertools.count():
             self.transition()
-            self.visualize(scale)
-            if self._update_display() == pygame.QUIT:
-                break
-            sleep(self.UPDATE_TIMEDELTA)
+
+            if visual:
+                self.visualize(scale)
+                if self._update_display() == pygame.QUIT:
+                    break
+                sleep(self.UPDATE_TIMEDELTA)
 
         for i, agent in enumerate(self.agents):
             try:

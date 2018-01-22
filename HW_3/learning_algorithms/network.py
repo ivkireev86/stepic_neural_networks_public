@@ -54,6 +54,11 @@ class Network(object):
         assert output_derivative is not None, "You should either provide derivative of the output function or leave it default!"
         self.output_derivative = output_derivative
 
+    def __repr__(self):
+        params = self.weights, self.biases
+        np.set_printoptions(threshold=np.nan)
+        return repr(params)
+
     def feedforward(self, a):
         """
         Вычислить и вернуть выходную активацию нейронной сети
@@ -68,7 +73,7 @@ class Network(object):
         return output
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
-            test_data=None):
+            test_data=None, verbose=False):
         """
         Обучить нейронную сеть, используя алгоритм стохастического
         (mini-batch) градиентного спуска.
@@ -95,12 +100,13 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
-            if test_data is not None:
-                success_tests = self.evaluate(test_data)
-                print("Эпоха {0}: {1} / {2}".format(
-                    j, success_tests, n_test))
-            else:
-                print("Эпоха {0} завершена".format(j))
+            if verbose:
+                if test_data is not None:
+                    success_tests = self.evaluate(test_data)
+                    print("Эпоха {0}: {1} / {2}".format(
+                        j, success_tests, n_test))
+                else:
+                    print("Эпоха {0} завершена".format(j))
         if test_data is not None:
             return success_tests / n_test
 
