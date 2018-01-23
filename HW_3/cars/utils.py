@@ -137,6 +137,9 @@ def define_sector(m, position):
     for i in range(len(m)):
         prev_phase = cur_phase
         cur_phase = phase(m[i][0])
+        if cur_phase < prev_phase:
+            # round over pi
+            cur_phase += 2 * pi
         if min(prev_phase, cur_phase) < phase(position) <= max(prev_phase, cur_phase):
             # position does not lie between i-1-th and i-th points of m
             return i

@@ -24,11 +24,12 @@ class Agent(metaclass=ABCMeta):
 
 
 class SimpleCarAgent(Agent):
-    def __init__(self, history_data=int(50000)):
+    def __init__(self, name="noname", history_data=int(50000)):
         """
         Создаёт машинку
         :param history_data: количество хранимых нами данных о результатах предыдущих шагов
         """
+        self.name = name
         self.evaluate_mode = False  # этот агент учится или экзаменутеся? если учится, то False
         self._rays = 5 # выберите число лучей ладара; например, 5
         # here +2 is for 2 inputs from elements of Action that we are trying to predict
