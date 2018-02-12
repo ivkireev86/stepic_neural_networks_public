@@ -3,6 +3,7 @@ import random
 from abc import ABCMeta, abstractmethod
 from cmath import rect, pi, phase
 from time import sleep
+from collections import Iterable
 
 import numpy as np
 import pygame
@@ -130,7 +131,7 @@ class SimpleCarWorld(World):
         return heading_reward * self.HEADING_REWARD + heading_penalty * self.WRONG_HEADING_PENALTY + collision_penalty \
             + idle_penalty + speeding_penalty
 
-    def run(self, steps=None, visual=True):
+    def run(self, steps=None, visual=True, save=True):
         """
         Основной цикл мира; по завершении сохраняет текущие веса агента в файл network_config_agent_n_layers_....txt
         :param steps: количество шагов цикла; до внешней остановки, если None
@@ -141,7 +142,16 @@ class SimpleCarWorld(World):
         if visual:
             scale = self._prepare_visualization()
 
-        for _ in range(steps) if steps is not None else itertools.count():
+        if steps is None:
+            steps = itertools.count()
+        elif isinstance(steps, Iterable):
+            pass
+        elif type(steps) is int:
+            steps = range(steps)
+        else:
+            RuntimeError("steps должен быть числом, итератором или None ")
+
+        for _ in steps:
             self.transition()
 
             if visual:
@@ -150,13 +160,14 @@ class SimpleCarWorld(World):
                     break
                 sleep(self.UPDATE_TIMEDELTA)
 
-        for i, agent in enumerate(self.agents):
-            try:
-                filename = "network_config_agent_%d_layers_%s.txt" % (i, "_".join(map(str, agent.neural_net.sizes)))
-                agent.to_file(filename)
-                print("Saved agent parameters to '%s'" % filename)
-            except AttributeError:
-                pass
+        if save:
+            for i, agent in enumerate(self.agents):
+                try:
+                    filename = "network_config_agent_%d_layers_%s.txt" % (i, "_".join(map(str, agent.neural_net.sizes)))
+                    agent.to_file(filename)
+                    print("Saved agent parameters to '%s'" % filename)
+                except AttributeError:
+                    pass
 
     def evaluate_agent(self, agent, steps=1000, visual=True):
         """

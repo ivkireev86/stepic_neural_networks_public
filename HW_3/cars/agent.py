@@ -24,15 +24,14 @@ class Agent(metaclass=ABCMeta):
 
 
 class SimpleCarAgent(Agent):
-    def __init__(self, name="noname", history_data=int(50000), visual_callback=None):
+    def __init__(self, name="noname", history_data=int(50000)):
         """
         Создаёт машинку
         :param history_data: количество хранимых нами данных о результатах предыдущих шагов
         """
         self.name = name
-        self.visual_callback = visual_callback
         self.evaluate_mode = False  # этот агент учится или экзаменутеся? если учится, то False
-        self._rays = 5 # выберите число лучей ладара; например, 5
+        self._rays = 10  # выберите число лучей ладара; например, 5
         # here +2 is for 2 inputs from elements of Action that we are trying to predict
         self.neural_net = Network([self.rays + 4,
                                    # внутренние слои сети: выберите, сколько и в каком соотношении вам нужно
@@ -85,10 +84,6 @@ class SimpleCarAgent(Agent):
     def from_file(cls, filename):
         c = open(filename, "r").read()
         return cls.from_string(c)
-
-    def _visual_callback(self):
-        if self.visual_callback:
-            self.visual_callback(agent=self)
 
     def clear_history(self):
         self.sensor_data_history.clear()
@@ -166,18 +161,19 @@ class SimpleCarAgent(Agent):
         # действие, но и предшествующие)
         i = -1
         self.reward_clean_history[i] = reward
-        while len(self.reward_history) > abs(i) and abs(i) < reward_depth:
-            self.reward_history[i] += reward
-            reward *= 0.5
-            i -= 1
+
+        # while len(self.reward_history) > abs(i) and abs(i) < reward_depth:
+        #     self.reward_history[i] += reward
+        #     reward *= 0.5
+        #     i -= 1
 
         # Если у нас накопилось хоть чуть-чуть данных, давайте потренируем нейросеть
         # прежде чем собирать новые данные
         # (проверьте, что вы в принципе храните достаточно данных (параметр `history_data` в `__init__`),
         # чтобы условие len(self.reward_history) >= train_every выполнялось
-        if not self.evaluate_mode and (len(self.reward_history) >= train_every) and not (self.step % train_every):
-            X_train = np.concatenate([self.sensor_data_history, self.chosen_actions_history], axis=1)
-            y_train = self.reward_history
-            train_data = [(x[:, np.newaxis], y) for x, y in zip(X_train, y_train)]
-            self.neural_net.SGD(training_data=train_data, epochs=15, mini_batch_size=train_every, eta=0.05)
-            self._visual_callback()
+        # if not self.evaluate_mode and (len(self.reward_history) >= train_every) and not (self.step % train_every):
+        #     X_train = np.concatenate([self.sensor_data_history, self.chosen_actions_history], axis=1)
+        #     y_train = self.reward_history
+        #     train_data = [(x[:, np.newaxis], y) for x, y in zip(X_train, y_train)]
+        #     self.neural_net.SGD(training_data=train_data, epochs=15, mini_batch_size=train_every, eta=0.05)
+
