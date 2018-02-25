@@ -182,7 +182,15 @@ class SimpleCarWorld(World):
         rewards = []
         if visual:
             scale = self._prepare_visualization()
-        for _ in range(steps):
+
+        if isinstance(steps, Iterable):
+            pass
+        elif type(steps) is int:
+            steps = range(steps)
+        else:
+            RuntimeError("steps должен быть числом, итератором или None ")
+
+        for _ in steps:
             vision = self.vision_for(agent)
             action = agent.choose_action(vision)
             next_agent_state, collision = self.physics.move(
