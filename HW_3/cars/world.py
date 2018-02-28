@@ -29,13 +29,13 @@ class World(metaclass=ABCMeta):
 class SimpleCarWorld(World):
     UPDATE_TIMEDELTA = 0.1
 
-    COLLISION_PENALTY = 0 * 1e0
+    COLLISION_PENALTY = 32 * 1e0
     HEADING_REWARD = 0 * 1e-1
     WRONG_HEADING_PENALTY = 0 * 1e0
     IDLENESS_PENALTY = 32 * 1e-1
-    SPEEDING_PENALTY = 32 * 1e-1
+    SPEEDING_PENALTY = 0 * 1e-1
     MIN_SPEED = 0.1 * 1e0
-    MAX_SPEED = 0.7 * 1e0
+    MAX_SPEED = 10 * 1e0
     size = (800, 600)
 
     def __init__(self, num_agents, car_map, Physics, agent_class, **physics_pars):
@@ -137,6 +137,9 @@ class SimpleCarWorld(World):
         :param steps: количество шагов цикла; до внешней остановки, если None
         :param visual: False, если обучать модель в скрытом режиме
         """
+        for agent in self.agents:
+            agent.evaluate_mode = False
+
         if steps is None and not visual:
             raise RuntimeError("Бесконечный цикл. Задайте steps или visual")
         if visual:
