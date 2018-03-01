@@ -72,8 +72,7 @@ class Network(object):
 
         return output
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
-            test_data=None, verbose=False):
+    def SGD(self, training_data, epochs, mini_batch_size, eta):
         """
         Обучить нейронную сеть, используя алгоритм стохастического
         (mini-batch) градиентного спуска.
@@ -90,9 +89,7 @@ class Network(object):
         но может существенно замедлить работу программы.
         """
 
-        if test_data is not None: n_test = len(test_data)
         n = len(training_data)
-        success_tests = 0
         for j in range(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -100,15 +97,7 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
-            if verbose:
-                if test_data is not None:
-                    success_tests = self.evaluate(test_data)
-                    print("Эпоха {0}: {1} / {2}".format(
-                        j, success_tests, n_test))
-                else:
-                    print("Эпоха {0} завершена".format(j))
-        if test_data is not None:
-            return success_tests / n_test
+
 
     def update_mini_batch(self, mini_batch, eta):
         """
@@ -175,16 +164,15 @@ class Network(object):
             nabla_w[-l] = np.dot(delta, activations[-l - 1].T)
         return nabla_b, nabla_w
 
-    def evaluate(self, test_data):
+    def evaluate(self, x_test, y_test):
         """
         Вернуть количество тестовых примеров, для которых нейронная сеть
         возвращает правильный ответ. Обратите внимание: подразумевается,
         что выход нейронной сети - это индекс, указывающий, какой из нейронов
         последнего слоя имеет наибольшую активацию.
         """
-        test_results = [(np.argmax(self.feedforward(x)), y)
-                        for (x, y) in test_data]
-        return sum(int(x == y) for (x, y) in test_results)
+        y_prediction = self.feedforward(x_test)
+        return (((y_test - y_prediction) ** 2).sum() / y_test.size) ** 0.5
 
     def cost_derivative(self, output_activations, y):
         """
