@@ -72,7 +72,8 @@ class Network(object):
 
         return output
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta):
+    def SGD(self, training_data, epochs, mini_batch_size, eta,
+            test_data=None):
         """
         Обучить нейронную сеть, используя алгоритм стохастического
         (mini-batch) градиентного спуска.
@@ -98,6 +99,8 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
 
+            if test_data:
+                yield self.evaluate(*test_data)
 
     def update_mini_batch(self, mini_batch, eta):
         """
