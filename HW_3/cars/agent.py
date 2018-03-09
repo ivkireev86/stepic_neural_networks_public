@@ -6,6 +6,7 @@ import numpy as np
 
 from cars.utils import Action
 from learning_algorithms.network import Network
+from .action_trainer import ActionTrainer
 
 
 class Agent(metaclass=ABCMeta):
@@ -52,7 +53,8 @@ class SimpleCarAgent(Agent):
         self.chosen_actions_history = deque([], maxlen=history_data)
         self.reward_history = deque([], maxlen=history_data)
         self.step = 0
-        self.RANDOM_ACTION_P = 0.30
+
+        self.action_trainer = ActionTrainer()
 
     @classmethod
     def from_weights(cls, layers, weights, biases):
@@ -125,12 +127,7 @@ class SimpleCarAgent(Agent):
                 rewards_to_controls_map.append((predicted_reward, action))
 
         # ищем действие, которое обещает максимальную награду
-        best_action = sorted(rewards_to_controls_map, key=lambda x: x[0])[-1][1]
-
-        # Добавим случайности, дух авантюризма. Иногда выбираем совершенно
-        # рандомное действие
-        if (not self.evaluate_mode) and (random.random() < self.RANDOM_ACTION_P):
-            best_action = rewards_to_controls_map[np.random.choice(len(rewards_to_controls_map))][1]
+        best_action = self.action_trainer.choose_action(rewards_to_controls_map)
 
         # запомним всё, что только можно: мы хотим учиться на своих ошибках
         self.sensor_data_history.append(sensor_info)
