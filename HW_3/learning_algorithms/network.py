@@ -102,6 +102,9 @@ class Network(object):
             if test_data:
                 yield self.evaluate(*test_data)
 
+        if test_data is None:
+            yield None
+
     def update_mini_batch(self, mini_batch, eta):
         """
         Обновить веса и смещения нейронной сети, сделав шаг градиентного

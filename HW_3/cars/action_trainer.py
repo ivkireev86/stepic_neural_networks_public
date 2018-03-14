@@ -15,13 +15,13 @@ class ActionTrainer(object):
 
         self.range = (0.0, 0.0,)
 
-    def set_params(self, l, h, random_default, random_bad, random_good, random_diff):
+    def set_params(self, low, high, random_default, random_bad, random_good, random_diff):
         self.random_default = random_default
         self.random_bad = random_bad
         self.random_good = random_good
         self.random_diff = random_diff
 
-        self.range = (l, h,)
+        self.range = (low, high,)
 
     def get_ranges(self):
         return self.range

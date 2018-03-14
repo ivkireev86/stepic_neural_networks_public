@@ -138,7 +138,7 @@ class SimpleCarWorld(World):
         :param visual: False, если обучать модель в скрытом режиме
         """
         for agent in self.agents:
-            agent.evaluate_mode = False
+            agent.action_trainer.set_evaluate(False)
 
         if steps is None and not visual:
             raise RuntimeError("Бесконечный цикл. Задайте steps или visual")
@@ -180,7 +180,7 @@ class SimpleCarWorld(World):
         :param visual: рисовать картинку или нет
         :return: среднее значение награды агента за шаг
         """
-        agent.evaluate_mode = True
+        agent.action_trainer.set_evaluate(True)
         self.set_agents([agent])
         rewards = []
         if visual:
