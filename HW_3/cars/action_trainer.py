@@ -47,7 +47,7 @@ class ActionTrainer(object):
         cl = sum((1 if expected_reward <= _l else 0 for expected_reward, act in options))
         ch = sum((1 if expected_reward >= _h else 0 for expected_reward, act in options))
 
-        if self._bad_choice_counter == 0 and random.random() < self.bad_choice_p:
+        if (not self._eval_mode) and self._bad_choice_counter == 0 and random.random() < self.bad_choice_p:
             self._bad_choice_counter = 5
 
         if self._bad_choice_counter > 0:
