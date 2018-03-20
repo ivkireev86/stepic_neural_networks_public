@@ -38,7 +38,8 @@ class SimpleCarAgent(Agent):
                                    # внутренние слои сети: выберите, сколько и в каком соотношении вам нужно
                                    # например, (self.rays + 4) * 2 или просто число
                                    #(self.rays + 4) * 2,
-                                   6,
+                                   18,
+                                   8,
                                    1],
                                   output_function=lambda x: x, output_derivative=lambda x: 1)
 
