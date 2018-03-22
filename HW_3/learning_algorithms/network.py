@@ -10,6 +10,7 @@
 
 import random
 import numpy as np
+from collections import Iterable
 
 
 #### Вспомогательные функции
@@ -90,8 +91,15 @@ class Network(object):
         но может существенно замедлить работу программы.
         """
 
+        if isinstance(epochs, Iterable):
+            pass
+        elif type(epochs) is int:
+            epochs = range(epochs)
+        else:
+            RuntimeError("steps должен быть числом, итератором или None ")
+
         n = len(training_data)
-        for j in range(epochs):
+        for j in epochs:
             random.shuffle(training_data)
             mini_batches = [
                 training_data[k:k + mini_batch_size]
