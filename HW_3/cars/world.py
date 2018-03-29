@@ -96,14 +96,15 @@ class SimpleCarWorld(World):
             )
             self.circles[a] += angle(self.agent_states[a].position, next_agent_state.position) / (2*pi)
             self.agent_states[a] = next_agent_state
-            a.receive_feedback(self.reward(next_agent_state, collision))
+            a.receive_feedback(self.reward(next_agent_state, collision, vision))
 
-    def reward(self, state, collision):
+    def reward(self, state, collision, vision):
         """
         Вычисление награды агента, находящегося в состоянии state.
         Эту функцию можно (и иногда нужно!) менять, чтобы обучить вашу сеть именно тем вещам, которые вы от неё хотите
         :param state: текущее состояние агента
         :param collision: произошло ли столкновение со стеной на прошлом шаге
+        :param vision: vision
         :return reward: награду агента (возможно, отрицательную)
         """
         a = -np.sin(angle(-state.position, state.heading))
@@ -112,9 +113,12 @@ class SimpleCarWorld(World):
         idle_penalty = 0 if abs(state.velocity) > self.MIN_SPEED else -self.IDLENESS_PENALTY
         speeding_penalty = 0 if abs(state.velocity) < self.MAX_SPEED else -self.SPEEDING_PENALTY * abs(state.velocity)
         collision_penalty = - max(abs(state.velocity), 0.1) * int(collision) * self.COLLISION_PENALTY
+        left_ray = vision[2]
+        right_ray = vision[-1]
+        center_penalty = - abs(left_ray - right_ray) / (left_ray + right_ray)
 
         return heading_reward * self.HEADING_REWARD + heading_penalty * self.WRONG_HEADING_PENALTY + collision_penalty \
-               + idle_penalty + speeding_penalty
+               + idle_penalty + speeding_penalty + center_penalty * 0.1
 
     def eval_reward(self, state, collision):
         """
